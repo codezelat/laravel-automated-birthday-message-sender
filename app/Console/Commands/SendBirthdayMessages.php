@@ -48,8 +48,14 @@ class SendBirthdayMessages extends Command
                 continue;
             }
 
+            if (!$contact->public_token) {
+                $contact->public_token = \Illuminate\Support\Str::random(10);
+                $contact->save();
+            }
+
+            $url = route('birthday.show', $contact->public_token);
             $name = strtoupper($contact->name);
-            $message = "HAPPY BIRTHDAY {$name}!\n\nSITC Campus wishes you a year filled with success, knowledge and new opportunities.\n\nKeep learning, growing and shining bright!";
+            $message = "HAPPY BIRTHDAY {$name}!\n\nSITC Campus wishes you a year filled with success, knowledge and new opportunities.\n\nYour Surprise: {$url}\n\nKeep learning, growing and shining bright!";
             
             $this->info("Sending message to {$contact->name} ({$contact->phone})...");
 

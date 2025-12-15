@@ -17,3 +17,9 @@ Route::middleware(['admin.auth'])->group(function () {
     Route::post('contacts/import', [ContactController::class, 'import'])->name('contacts.import');
     Route::get('contacts/export/csv', [ContactController::class, 'export'])->name('contacts.export');
 });
+
+use App\Http\Controllers\BirthdayController;
+Route::get('/birthday/{token}', [BirthdayController::class, 'show'])->name('birthday.show');
+Route::get('/birthday/{token}/card', [BirthdayController::class, 'card'])->name('birthday.card');
+Route::get('/birthday/{token}/download', [BirthdayController::class, 'download'])->name('birthday.download');
+
