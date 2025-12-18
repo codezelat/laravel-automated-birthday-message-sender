@@ -38,13 +38,16 @@ class SmsService
             ]);
 
             if ($response->successful()) {
+                LoggerService::log('SMS Sent', "SMS sent to {$phone}", 'success', ['response' => $response->body()]);
                 Log::info("SMS sent to {$phone}: {$response->body()}");
                 return true;
             } else {
+                LoggerService::log('SMS Failed', "SMS failed to {$phone}", 'error', ['status' => $response->status(), 'response' => $response->body()]);
                 Log::error("SMS failed to {$phone}: {$response->status()} - {$response->body()}");
                 return false;
             }
         } catch (\Exception $e) {
+            LoggerService::log('SMS Error', "Exception sending SMS to {$phone}", 'error', ['message' => $e->getMessage()]);
             Log::error("SMS Exception to {$phone}: " . $e->getMessage());
             return false;
         }

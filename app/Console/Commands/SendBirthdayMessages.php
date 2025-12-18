@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Models\Contact;
 use App\Services\SmsService;
+use App\Services\LoggerService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
@@ -33,6 +34,7 @@ class SendBirthdayMessages extends Command
         $currentYear = $today->year;
 
         $this->info("Checking for birthdays on " . $today->format('Y-m-d'));
+        LoggerService::log('Scheduler Started', "Running birthday check for " . $today->format('Y-m-d'));
 
         // SQLite doesn't have MONTH() and DAY() functions like MySQL by default in all versions or configs,
         // but Laravel's whereMonth and whereDay abstraction usually handles it.
@@ -69,5 +71,6 @@ class SendBirthdayMessages extends Command
         }
 
         $this->info("Birthday messages sent: {$count}");
+        LoggerService::log('Scheduler Completed', "Birthday check finished. Sent {$count} messages.", 'success', ['count' => $count]);
     }
 }

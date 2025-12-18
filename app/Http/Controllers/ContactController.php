@@ -6,12 +6,37 @@ use App\Models\Contact;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Illuminate\Support\Facades\Artisan;
 
 class ContactController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $contacts = Contact::orderBy('name')->paginate(10);
+        $query = Contact::query();
+
+        // Search
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('phone', 'like', "%{$search}%");
+            });
+        }
+
+        // Sort
+        $sortColumn = $request->get('sort_by', 'created_at'); // Default sort
+        $sortDirection = $request->get('sort_direction', 'desc');
+
+        // Allowable columns for sorting to prevent SQL injection
+        $allowableColumns = ['name', 'phone', 'dob', 'last_message_sent_year', 'created_at'];
+        if (in_array($sortColumn, $allowableColumns)) {
+            $query->orderBy($sortColumn, $sortDirection);
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }
+
+        $contacts = $query->paginate(10)->withQueryString(); // Preserve query params
+        
         return view('contacts.index', compact('contacts'));
     }
 
@@ -63,6 +88,27 @@ class ContactController extends Controller
     {
         $contact->delete();
         return redirect()->route('contacts.index')->with('success', 'Contact deleted successfully.');
+    }
+
+    public function sendManual(Contact $contact, \App\Services\SmsService $smsService)
+    {
+        // Ensure public token exists
+        if (!$contact->public_token) {
+            $contact->public_token = \Illuminate\Support\Str::random(10);
+            $contact->save();
+        }
+
+        $url = route('birthday.show', $contact->public_token);
+        $name = strtoupper($contact->name);
+        $message = "HAPPY BIRTHDAY {$name}!\n\nSITC Campus wishes you a year filled with success, knowledge and new opportunities.\n\nYour Surprise: {$url}\n\nKeep learning, growing and shining bright!";
+
+        if ($smsService->send($contact->phone, $message)) {
+            \App\Services\LoggerService::log('Manual Single Send', "Forced message to {$contact->name}.", 'success', ['phone' => $contact->phone]);
+            return redirect()->back()->with('success', "Message sent to {$contact->name}.");
+        } else {
+            \App\Services\LoggerService::log('Manual Single Send Failed', "Failed to send to {$contact->name}.", 'error', ['phone' => $contact->phone]);
+            return redirect()->back()->with('error', "Failed to send message to {$contact->name}.");
+        }
     }
 
     public function import(Request $request)
@@ -123,5 +169,36 @@ class ContactController extends Controller
         };
 
         return response()->stream($callback, 200, $headers);
+    }
+
+    public function sendToday()
+    {
+        \App\Services\LoggerService::log('Manual Trigger', 'User triggered manual birthday check.', 'info', ['user' => session('admin_username') ?? 'admin']);
+        Artisan::call('birthday:send');
+        // Capture output if needed: Artisan::output();
+        return redirect()->route('contacts.index')->with('success', 'Manual sending process triggered. Check logs for details.');
+    }
+
+    public function bulkDestroy(Request $request)
+    {
+        $ids = $request->input('ids');
+        if (empty($ids)) {
+            return redirect()->back()->with('error', 'No contacts selected.');
+        }
+
+        $count = count($ids);
+        Contact::whereIn('id', $ids)->delete();
+        \App\Services\LoggerService::log('Bulk Delete', "Deleted {$count} contacts.", 'success', ['count' => $count]);
+
+        return redirect()->route('contacts.index')->with('success', "{$count} contacts deleted successfully.");
+    }
+
+    public function deleteAll()
+    {
+        $count = Contact::count();
+        Contact::truncate();
+        \App\Services\LoggerService::log('Delete All', "Deleted all {$count} contacts.", 'warning', ['count' => $count]);
+
+        return redirect()->route('contacts.index')->with('success', 'All contacts have been deleted.');
     }
 }

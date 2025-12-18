@@ -16,6 +16,11 @@ Route::middleware(['admin.auth'])->group(function () {
     Route::resource('contacts', ContactController::class);
     Route::post('contacts/import', [ContactController::class, 'import'])->name('contacts.import');
     Route::get('contacts/export/csv', [ContactController::class, 'export'])->name('contacts.export');
+    Route::post('contacts/send-today', [ContactController::class, 'sendToday'])->name('contacts.send_today');
+    Route::post('contacts/bulk-delete', [ContactController::class, 'bulkDestroy'])->name('contacts.bulk_delete');
+    Route::post('contacts/delete-all', [ContactController::class, 'deleteAll'])->name('contacts.delete_all');
+    Route::post('contacts/{contact}/send-manual', [ContactController::class, 'sendManual'])->name('contacts.send_manual');
+    Route::get('logs', [App\Http\Controllers\ActivityLogController::class, 'index'])->name('logs.index');
 });
 
 use App\Http\Controllers\BirthdayController;
