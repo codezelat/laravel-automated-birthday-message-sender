@@ -100,7 +100,7 @@ class ContactController extends Controller
 
         $url = route('birthday.show', $contact->public_token);
         $name = strtoupper($contact->name);
-        $message = "HAPPY BIRTHDAY {$name}!\n\nSITC Campus wishes you a year filled with success, knowledge and new opportunities.\n\nYour Surprise: {$url}\n\nKeep learning, growing and shining bright!";
+        $message = "HAPPY BIRTHDAY {$name}!\n\nSITC Campus wishes you a year filled with success, knowledge and new opportunities.\n\nYour Birthday Card: {$url}\n\nKeep learning, growing and shining bright!";
 
         if ($smsService->send($contact->phone, $message)) {
             \App\Services\LoggerService::log('Manual Single Send', "Forced message to {$contact->name}.", 'success', ['phone' => $contact->phone]);

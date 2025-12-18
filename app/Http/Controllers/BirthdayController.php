@@ -29,7 +29,7 @@ class BirthdayController extends Controller
 
          return response()->streamDownload(function() use ($image) {
              echo $image->toJpeg();
-         }, 'birthday-card.jpg');
+         }, 'birthday-card.jpg', ['Content-Type' => 'image/jpeg']);
     }
 
     private function getBirthdayCardImage($contact)
