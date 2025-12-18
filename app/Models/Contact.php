@@ -19,4 +19,13 @@ class Contact extends Model
     protected $casts = [
         'dob' => 'date',
     ];
+
+    public function getShortNameAttribute()
+    {
+        $words = explode(' ', $this->name);
+        if (count($words) > 3) {
+            return implode(' ', array_slice($words, -3));
+        }
+        return $this->name;
+    }
 }

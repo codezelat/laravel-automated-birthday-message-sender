@@ -37,7 +37,7 @@ class BirthdayController extends Controller
         $manager = new ImageManager(new Driver());
         $image = $manager->read(public_path('images/SITC Birthday Card.jpg'));
         
-        $image->text(strtoupper($contact->name), $image->width() / 2, $image->height() / 2 - 40, function ($font) {
+        $image->text(strtoupper($contact->short_name), $image->width() / 2, $image->height() / 2 - 40, function ($font) {
             $font->filename(public_path('fonts/GreatVibes-Regular.ttf'));
             $font->color('#D32F2F'); // Nice Red
             $font->size(60);         // Smaller size
