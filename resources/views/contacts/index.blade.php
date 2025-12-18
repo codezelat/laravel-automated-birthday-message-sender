@@ -214,9 +214,7 @@
     <div class="mt-4">
         {{ $contacts->links() }}
     </div>
-    <div class="mt-4">
-        {{ $contacts->links() }}
-    </div>
+
 </div>
 
 <form action="{{ route('logout') }}" method="POST" class="mt-6 text-center">
