@@ -37,10 +37,22 @@ class BirthdayController extends Controller
         $manager = new ImageManager(new Driver());
         $image = $manager->read(public_path('images/SITC Birthday Card.jpg'));
         
-        $image->text(strtoupper($contact->short_name), $image->width() / 2, $image->height() / 2 - 40, function ($font) {
-            $font->filename(public_path('fonts/GreatVibes-Regular.ttf'));
+        $name = strtoupper($contact->short_name);
+        $length = strlen($name);
+        $fontSize = 60;
+        
+        // Smart wrapping and sizing for long names
+        if ($length > 20) {
+            $name = wordwrap($name, 15, "\n"); // Wrap every ~15 chars
+            $fontSize = 40;
+        } elseif ($length > 12) {
+            $fontSize = 50;
+        }
+
+        $image->text($name, $image->width() / 2, $image->height() / 2 - 40, function ($font) use ($fontSize) {
+            $font->filename(public_path('fonts/EmilysCandy-Regular.ttf'));
             $font->color('#D32F2F'); // Nice Red
-            $font->size(60);         // Smaller size
+            $font->size($fontSize);
             $font->align('center');
             $font->valign('middle');
         });
