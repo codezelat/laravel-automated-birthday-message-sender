@@ -1851,7 +1851,7 @@ Contributions are welcome! Please follow these guidelines:
 
 If you discover a security vulnerability, please **DO NOT** open a public issue. Instead:
 
-1. Email: your-email@example.com
+1. Email: info@codezela.com
 2. Include:
     - Description of the vulnerability
     - Steps to reproduce
